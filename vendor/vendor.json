@@ -1,0 +1,49 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "1vBxRCnvy3GxfVUrpAN5+NlQ2QM=",
+			"path": "github.com/prometheus/client_golang",
+			"revision": "c5b7fccd204277076155f10851dad72b76a49317",
+			"revisionTime": "2016-08-17T15:48:24Z",
+			"version": "=v0.8.0",
+			"versionExact": "v0.8.0"
+		},
+		{
+			"checksumSHA1": "ICqEK0v1fdcuZGTWBW1EytjGuLY=",
+			"path": "github.com/prometheus/client_golang/api",
+			"revision": "c5b7fccd204277076155f10851dad72b76a49317",
+			"revisionTime": "2016-08-17T15:48:24Z",
+			"version": "=v0.8.0",
+			"versionExact": "v0.8.0"
+		},
+		{
+			"checksumSHA1": "vzeidZ3FlpAOQOzUAinE8zzxVRk=",
+			"path": "github.com/prometheus/client_golang/api/prometheus",
+			"revision": "c5b7fccd204277076155f10851dad72b76a49317",
+			"revisionTime": "2016-08-17T15:48:24Z",
+			"version": "=v0.8.0",
+			"versionExact": "v0.8.0"
+		},
+		{
+			"checksumSHA1": "3VoqH7TFfzA6Ds0zFzIbKCUvBmw=",
+			"path": "github.com/prometheus/common/model",
+			"revision": "2f17f4a9d485bf34b4bfaccc273805040e4f86c8",
+			"revisionTime": "2017-09-08T16:18:22Z"
+		},
+		{
+			"checksumSHA1": "dr5+PfIRzXeN+l1VG+s0lea9qz8=",
+			"path": "golang.org/x/net/context",
+			"revision": "0a9397675ba34b2845f758fe3cd68828369c6517",
+			"revisionTime": "2017-07-19T03:24:12Z"
+		},
+		{
+			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
+			"path": "golang.org/x/net/context/ctxhttp",
+			"revision": "0a9397675ba34b2845f758fe3cd68828369c6517",
+			"revisionTime": "2017-07-19T03:24:12Z"
+		}
+	],
+	"rootPath": "github.com/portertech/sensu-prometheus-collector"
+}
