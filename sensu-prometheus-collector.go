@@ -6,16 +6,18 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/prometheus/client_golang/api/prometheus"
+	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/model"
 )
 
 type Tag struct {
-	Name  string
-	Value string
+	Name  model.LabelName
+	Value model.LabelValue
 }
 
 type Metric struct {
@@ -31,8 +33,8 @@ func CreateJSONMetrics(samples model.Vector) string {
 
 		for name, value := range sample.Metric {
 			tag := Tag{
-				Name:  string(name),
-				Value: string(value),
+				Name:  name,
+				Value: value,
 			}
 
 			metric.Tags = append(metric.Tags, tag)
@@ -117,7 +119,6 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	promClient, err := prometheus.New(promConfig)
 
 	if err != nil {
-		fmt.Errorf("%v", err)
 		return nil, err
 	}
 
@@ -126,7 +127,6 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	promResponse, err := promQueryClient.Query(ctx, queryString, time.Now())
 
 	if err != nil {
-		fmt.Errorf("%v", err)
 		return nil, err
 	}
 
@@ -137,13 +137,58 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	return nil, errors.New("unexpected response type")
 }
 
+func QueryExporter(exporterURL string) (model.Vector, error) {
+	expResponse, err := http.Get(exporterURL)
+	defer expResponse.Body.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if expResponse.StatusCode != http.StatusOK {
+		return nil, errors.New("non OK HTTP response status")
+	}
+
+	var parser expfmt.TextParser
+
+	metricFamilies, err := parser.TextToMetricFamilies(expResponse.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	samples := model.Vector{}
+
+	decodeOptions := &expfmt.DecodeOptions{
+		Timestamp: model.Time(time.Now().Unix()),
+	}
+
+	for _, family := range metricFamilies {
+		familySamples, _ := expfmt.ExtractSamples(decodeOptions, family)
+
+		for _, sample := range familySamples {
+			samples = append(samples, sample)
+		}
+	}
+
+	return samples, nil
+}
+
 func main() {
-	promURL := flag.String("url", "http://localhost:9090", "Prometheus API URL")
-	queryString := flag.String("query", "up", "Prometheus API query string")
+	exporterURL := flag.String("exporter-url", "", "Prometheus exporter URL to pull metrics from")
+	promURL := flag.String("prom-url", "http://localhost:9090", "Prometheus API URL")
+	queryString := flag.String("prom-query", "up", "Prometheus API query string")
 	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}")
 	flag.Parse()
 
-	samples, err := QueryPrometheus(*promURL, *queryString)
+	samples := model.Vector{}
+	var err error
+
+	if *exporterURL != "" {
+		samples, err = QueryExporter(*exporterURL)
+	} else {
+		samples, err = QueryPrometheus(*promURL, *queryString)
+	}
 
 	if err != nil {
 		fmt.Errorf("%v", err)
