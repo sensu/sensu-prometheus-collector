@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"time"
@@ -62,38 +63,51 @@ func CreateGraphiteMetrics(samples model.Vector) (string, error) {
 	return metrics, nil
 }
 
+func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	promConfig := prometheus.Config{Address: promURL}
+	promClient, err := prometheus.New(promConfig)
+
+	if err != nil {
+		fmt.Errorf("%v", err)
+		return nil, err
+	}
+
+	promQueryClient := prometheus.NewQueryAPI(promClient)
+
+	promResponse, err := promQueryClient.Query(ctx, queryString, time.Now())
+
+	if err != nil {
+		fmt.Errorf("%v", err)
+		return nil, err
+	}
+
+	if promResponse.Type() == model.ValVector {
+		return promResponse.(model.Vector), nil
+	}
+
+	return nil, errors.New("unexpected response type")
+}
+
 func main() {
 	promURL := flag.String("url", "http://localhost:9090", "Prometheus API URL")
 	queryString := flag.String("query", "up", "Prometheus API query string")
 	flag.Parse()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	promConfig := prometheus.Config{Address: *promURL}
-	promClient, err := prometheus.New(promConfig)
+	samples, err := QueryPrometheus(*promURL, *queryString)
 
 	if err != nil {
 		fmt.Errorf("%v", err)
 		return
 	}
 
-	promQueryClient := prometheus.NewQueryAPI(promClient)
-
-	promResponse, err := promQueryClient.Query(ctx, *queryString, time.Now())
-
-	if err != nil {
-		fmt.Errorf("%v", err)
-		return
+	metrics, _ := CreateMetrics(samples)
+	for _, metric := range metrics {
+		fmt.Printf("%+v\n", metric)
 	}
 
-	if promResponse.Type() == model.ValVector {
-		metrics, _ := CreateMetrics(promResponse.(model.Vector))
-		for _, metric := range metrics {
-			fmt.Printf("%+v\n", metric)
-		}
-
-		graphiteMetrics, _ := CreateGraphiteMetrics(promResponse.(model.Vector))
-		fmt.Printf("%s\n", graphiteMetrics)
-	}
+	graphiteMetrics, _ := CreateGraphiteMetrics(samples)
+	fmt.Printf("%s\n", graphiteMetrics)
 }
