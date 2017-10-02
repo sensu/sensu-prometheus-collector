@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/prometheus/client_golang/api/prometheus"
@@ -66,11 +67,37 @@ func CreateGraphiteMetrics(samples model.Vector) string {
 	return metrics
 }
 
+func CreateInfluxMetrics(samples model.Vector) string {
+	metrics := ""
+
+	for _, sample := range samples {
+		metric := string(sample.Metric["__name__"])
+
+		for name, value := range sample.Metric {
+			if name != "__name__" {
+				metric += fmt.Sprintf(",%s=%s", name, value)
+			}
+		}
+
+		value := sample.Value
+
+		now := time.Now()
+		timestamp := now.Unix()
+
+		metric += fmt.Sprintf(" value=%f %v\n", value, timestamp)
+
+		metrics += metric
+	}
+
+	return metrics
+}
+
 func OutputMetrics(samples model.Vector, outputFormat string) error {
 	output := ""
 
 	switch outputFormat {
 	case "influx":
+		output = CreateInfluxMetrics(samples)
 	case "graphite":
 		output = CreateGraphiteMetrics(samples)
 	case "json":
@@ -120,13 +147,13 @@ func main() {
 
 	if err != nil {
 		fmt.Errorf("%v", err)
-		return
+		os.Exit(2)
 	}
 
 	err = OutputMetrics(samples, *outputFormat)
 
 	if err != nil {
 		fmt.Errorf("%v", err)
-		return
+		os.Exit(2)
 	}
 }
