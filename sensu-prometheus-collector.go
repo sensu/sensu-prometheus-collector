@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"time"
 
@@ -62,10 +63,14 @@ func CreateGraphiteMetrics(samples model.Vector) (string, error) {
 }
 
 func main() {
+	promURL := flag.String("url", "http://localhost:9090", "Prometheus API URL")
+	queryString := flag.String("query", "up", "Prometheus API query string")
+	flag.Parse()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	promConfig := prometheus.Config{Address: "http://localhost:9090"}
+	promConfig := prometheus.Config{Address: *promURL}
 	promClient, err := prometheus.New(promConfig)
 
 	if err != nil {
@@ -75,7 +80,7 @@ func main() {
 
 	promQueryClient := prometheus.NewQueryAPI(promClient)
 
-	promResponse, err := promQueryClient.Query(ctx, "go_gc_duration_seconds", time.Now())
+	promResponse, err := promQueryClient.Query(ctx, *queryString, time.Now())
 
 	if err != nil {
 		fmt.Errorf("%v", err)

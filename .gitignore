@@ -1,3 +1,6 @@
+# Binary
+sensu-prometheus-collector
+
 # Binaries for programs and plugins
 *.exe
 *.dll
