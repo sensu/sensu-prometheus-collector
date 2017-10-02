@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -21,7 +22,7 @@ type Metric struct {
 	Value float64
 }
 
-func CreateMetrics(samples model.Vector) ([]Metric, error) {
+func CreateJSONMetrics(samples model.Vector) string {
 	metrics := []Metric{}
 
 	for _, sample := range samples {
@@ -41,10 +42,12 @@ func CreateMetrics(samples model.Vector) ([]Metric, error) {
 		metrics = append(metrics, metric)
 	}
 
-	return metrics, nil
+	jsonMetrics, _ := json.Marshal(metrics)
+
+	return string(jsonMetrics)
 }
 
-func CreateGraphiteMetrics(samples model.Vector) (string, error) {
+func CreateGraphiteMetrics(samples model.Vector) string {
 	metrics := ""
 
 	for _, sample := range samples {
@@ -60,7 +63,23 @@ func CreateGraphiteMetrics(samples model.Vector) (string, error) {
 		metrics += metric
 	}
 
-	return metrics, nil
+	return metrics
+}
+
+func OutputMetrics(samples model.Vector, outputFormat string) error {
+	output := ""
+
+	switch outputFormat {
+	case "influx":
+	case "graphite":
+		output = CreateGraphiteMetrics(samples)
+	case "json":
+		output = CreateJSONMetrics(samples)
+	}
+
+	fmt.Println(output)
+
+	return nil
 }
 
 func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
@@ -94,6 +113,7 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 func main() {
 	promURL := flag.String("url", "http://localhost:9090", "Prometheus API URL")
 	queryString := flag.String("query", "up", "Prometheus API query string")
+	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}")
 	flag.Parse()
 
 	samples, err := QueryPrometheus(*promURL, *queryString)
@@ -103,11 +123,10 @@ func main() {
 		return
 	}
 
-	metrics, _ := CreateMetrics(samples)
-	for _, metric := range metrics {
-		fmt.Printf("%+v\n", metric)
-	}
+	err = OutputMetrics(samples, *outputFormat)
 
-	graphiteMetrics, _ := CreateGraphiteMetrics(samples)
-	fmt.Printf("%s\n", graphiteMetrics)
+	if err != nil {
+		fmt.Errorf("%v", err)
+		return
+	}
 }
