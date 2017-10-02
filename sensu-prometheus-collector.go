@@ -146,7 +146,7 @@ func QueryExporter(exporterURL string) (model.Vector, error) {
 	}
 
 	if expResponse.StatusCode != http.StatusOK {
-		return nil, errors.New("non OK HTTP response status")
+		return nil, errors.New("exporter returned non OK HTTP response status")
 	}
 
 	var parser expfmt.TextParser
@@ -165,10 +165,7 @@ func QueryExporter(exporterURL string) (model.Vector, error) {
 
 	for _, family := range metricFamilies {
 		familySamples, _ := expfmt.ExtractSamples(decodeOptions, family)
-
-		for _, sample := range familySamples {
-			samples = append(samples, sample)
-		}
+		samples = append(samples, familySamples...)
 	}
 
 	return samples, nil
