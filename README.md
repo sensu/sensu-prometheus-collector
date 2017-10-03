@@ -7,12 +7,47 @@ Influx (the default), Graphite, or JSON.
 
 The Sensu Prometheus Collector turns Sensu into a *SUPER POWERED
 Prometheus metric poller*, leveraging Sensu's pubsub design and client
-auto-registration (discovery). Sensu can deliver metrics to one or
-more time-series databases, for example InfluxDB or Graphite!
-Instrument your applications with the Prometheus clients and
-immediately begin collecting your metrics with Sensu!
+auto-registration (discovery). Sensu can deliver collected metrics to
+one or more time-series databases, for example InfluxDB and/or
+Graphite! Instrument your applications with the Prometheus libraries
+and immediately begin collecting your metrics with Sensu!
 
-### Examples
+### Configuration
+
+Example Sensu 1.x check definition:
+
+```json
+{
+  "checks": {
+    "prometheus_metrics": {
+      "type": "metric",
+      "command": "sensu-prometheus-collector -exporter-url http://localhost:8080/metrics",
+      "subscribers": ["app_tier"],
+      "interval": 10,
+      "handler": "influx"
+    }
+  }
+}
+```
+
+Example Sensu 1.x handler definition:
+
+```json
+{
+  "handlers": {
+    "influx": {
+      "type": "udp",
+      "mutator": "only_check_output",
+      "socket": {
+        "host": "influx.example.com",
+        "port": 8189
+      }
+    }
+  }
+}
+```
+
+### Usage Examples
 
 Help:
 
