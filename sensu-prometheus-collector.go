@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/api/prometheus"
@@ -56,12 +57,12 @@ func CreateGraphiteMetrics(samples model.Vector, metricPrefix string) string {
 	for _, sample := range samples {
 		name := fmt.Sprintf("%s%s", metricPrefix, sample.Metric["__name__"])
 
-		value := sample.Value
+		value := strconv.FormatFloat(float64(sample.Value), 'f', -1, 64)
 
 		now := time.Now()
 		timestamp := now.Unix()
 
-		metric := fmt.Sprintf("%s %f %v\n", name, value, timestamp)
+		metric := fmt.Sprintf("%s %s %d\n", name, value, timestamp)
 
 		metrics += metric
 	}
@@ -81,12 +82,12 @@ func CreateInfluxMetrics(samples model.Vector, metricPrefix string) string {
 			}
 		}
 
-		value := sample.Value
+		value := strconv.FormatFloat(float64(sample.Value), 'f', -1, 64)
 
 		now := time.Now()
 		timestamp := now.Unix()
 
-		metric += fmt.Sprintf(" value=%f %v\n", value, timestamp)
+		metric += fmt.Sprintf(" value=%s %d\n", value, timestamp)
 
 		metrics += metric
 	}
