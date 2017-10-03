@@ -12,6 +12,12 @@ one or more time-series databases, for example InfluxDB and/or
 Graphite! Instrument your applications with the Prometheus libraries
 and immediately begin collecting your metrics with Sensu!
 
+### Installation
+
+Download the latest version of the binary `sensu-prometheus-collector`
+from
+[Releases](https://github.com/portertech/sensu-prometheus-collector/releases).
+
 ### Configuration
 
 Example Sensu 1.x check definition:
