@@ -50,11 +50,11 @@ func CreateJSONMetrics(samples model.Vector) string {
 	return string(jsonMetrics)
 }
 
-func CreateGraphiteMetrics(samples model.Vector) string {
+func CreateGraphiteMetrics(samples model.Vector, metricPrefix string) string {
 	metrics := ""
 
 	for _, sample := range samples {
-		name := sample.Metric["__name__"]
+		name := fmt.Sprintf("%s%s", metricPrefix, sample.Metric["__name__"])
 
 		value := sample.Value
 
@@ -69,11 +69,11 @@ func CreateGraphiteMetrics(samples model.Vector) string {
 	return metrics
 }
 
-func CreateInfluxMetrics(samples model.Vector) string {
+func CreateInfluxMetrics(samples model.Vector, metricPrefix string) string {
 	metrics := ""
 
 	for _, sample := range samples {
-		metric := string(sample.Metric["__name__"])
+		metric := fmt.Sprintf("%s%s", metricPrefix, sample.Metric["__name__"])
 
 		for name, value := range sample.Metric {
 			if name != "__name__" {
@@ -94,14 +94,14 @@ func CreateInfluxMetrics(samples model.Vector) string {
 	return metrics
 }
 
-func OutputMetrics(samples model.Vector, outputFormat string) error {
+func OutputMetrics(samples model.Vector, outputFormat string, metricPrefix string) error {
 	output := ""
 
 	switch outputFormat {
 	case "influx":
-		output = CreateInfluxMetrics(samples)
+		output = CreateInfluxMetrics(samples, metricPrefix)
 	case "graphite":
-		output = CreateGraphiteMetrics(samples)
+		output = CreateGraphiteMetrics(samples, metricPrefix)
 	case "json":
 		output = CreateJSONMetrics(samples)
 	}
@@ -172,10 +172,11 @@ func QueryExporter(exporterURL string) (model.Vector, error) {
 }
 
 func main() {
-	exporterURL := flag.String("exporter-url", "", "Prometheus exporter URL to pull metrics from")
-	promURL := flag.String("prom-url", "http://localhost:9090", "Prometheus API URL")
-	queryString := flag.String("prom-query", "up", "Prometheus API query string")
-	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}")
+	exporterURL := flag.String("exporter-url", "", "Prometheus exporter URL to pull metrics from.")
+	promURL := flag.String("prom-url", "http://localhost:9090", "Prometheus API URL.")
+	queryString := flag.String("prom-query", "up", "Prometheus API query string.")
+	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}.")
+	metricPrefix := flag.String("metric-prefix", "", "Metric name prefix, only supported by line protocol output formats.")
 	flag.Parse()
 
 	samples := model.Vector{}
@@ -192,7 +193,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	err = OutputMetrics(samples, *outputFormat)
+	err = OutputMetrics(samples, *outputFormat, *metricPrefix)
 
 	if err != nil {
 		fmt.Errorf("%v", err)
