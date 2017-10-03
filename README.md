@@ -14,7 +14,7 @@ and immediately begin collecting your metrics with Sensu!
 
 ### Installation
 
-Download the latest version of the binary `sensu-prometheus-collector`
+Download the latest version of the `sensu-prometheus-collector` binary
 from
 [Releases](https://github.com/portertech/sensu-prometheus-collector/releases).
 
@@ -22,7 +22,7 @@ from
 
 Example Sensu 1.x check definition:
 
-```json
+```
 {
   "checks": {
     "prometheus_metrics": {
@@ -38,7 +38,7 @@ Example Sensu 1.x check definition:
 
 Example Sensu 1.x handler definition:
 
-```json
+```
 {
   "handlers": {
     "influx": {
