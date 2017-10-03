@@ -5,9 +5,12 @@ metrics from a Prometheus exporter or the Prometheus query API. The
 collected metrics are outputted to STDOUT in one of three formats,
 Influx (the default), Graphite, or JSON.
 
-The Sensu Prometheus Collector turns Sensu into a *SUPER POWERED*
-Prometheus metric poller, leveraging Sensu's pubsub design and client
-auto-registration (discovery).
+The Sensu Prometheus Collector turns Sensu into a *SUPER POWERED
+Prometheus metric poller*, leveraging Sensu's pubsub design and client
+auto-registration (discovery). Sensu can deliver metrics to one or
+more time-series databases, for example InfluxDB or Graphite!
+Instrument your applications with the Prometheus clients and
+immediately begin collecting your metrics with Sensu!
 
 ### Examples
 
