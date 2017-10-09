@@ -17,7 +17,7 @@ func TestQueryExporter(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	samples, err := QueryExporter("http://localhost:7777/metrics")
+	samples, err := QueryExporter("http://localhost:7777/metrics", exporterAuth{User: "", Password: ""})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, samples)

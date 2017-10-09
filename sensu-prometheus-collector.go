@@ -11,9 +11,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/api/prometheus"
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/model"
+)
+
+const (
+	exporterAuthID = "exporter"
 )
 
 type Tag struct {
@@ -24,6 +29,11 @@ type Tag struct {
 type Metric struct {
 	Tags  []Tag
 	Value float64
+}
+
+type exporterAuth struct {
+	User     string `envconfig:"user" default:""`
+	Password string `envconfig:"password" default:""`
 }
 
 func CreateJSONMetrics(samples model.Vector) string {
@@ -138,17 +148,23 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	return nil, errors.New("unexpected response type")
 }
 
-func QueryExporter(exporterURL string) (model.Vector, error) {
-	expResponse, err := http.Get(exporterURL)
-	defer expResponse.Body.Close()
-
+func QueryExporter(exporterURL string, auth exporterAuth) (model.Vector, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", exporterURL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if expResponse.StatusCode != http.StatusOK {
-		return nil, errors.New("exporter returned non OK HTTP response status")
+	req.SetBasicAuth(auth.User, auth.Password)
+
+	expResponse, err := client.Do(req)
+	if err != nil {
+		return nil, err
 	}
+	if expResponse.StatusCode != http.StatusOK {
+		return nil, errors.New("exporter returned non OK HTTP response status: " + expResponse.Status)
+	}
+	defer expResponse.Body.Close()
 
 	var parser expfmt.TextParser
 
@@ -172,32 +188,42 @@ func QueryExporter(exporterURL string) (model.Vector, error) {
 	return samples, nil
 }
 
+func setExporterAuth(user string, password string) (auth exporterAuth) {
+	envconfig.Process(exporterAuthID, &auth)
+	if user != "" && password != "" {
+		auth = exporterAuth{User: user, Password: password}
+	}
+	return
+}
+
 func main() {
 	exporterURL := flag.String("exporter-url", "", "Prometheus exporter URL to pull metrics from.")
+	exporterUser := flag.String("exporter-user", "", "Prometheus exporter basic auth user")
+	exporterPassword := flag.String("exporter-password", "", "Prometheus exporter basic auth password")
 	promURL := flag.String("prom-url", "http://localhost:9090", "Prometheus API URL.")
 	queryString := flag.String("prom-query", "up", "Prometheus API query string.")
 	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}.")
 	metricPrefix := flag.String("metric-prefix", "", "Metric name prefix, only supported by line protocol output formats.")
 	flag.Parse()
 
-	samples := model.Vector{}
+	var samples model.Vector
 	var err error
 
 	if *exporterURL != "" {
-		samples, err = QueryExporter(*exporterURL)
+		samples, err = QueryExporter(*exporterURL, setExporterAuth(*exporterUser, *exporterPassword))
 	} else {
 		samples, err = QueryPrometheus(*promURL, *queryString)
 	}
 
 	if err != nil {
-		fmt.Errorf("%v", err)
+		_ = fmt.Errorf("%v", err)
 		os.Exit(2)
 	}
 
 	err = OutputMetrics(samples, *outputFormat, *metricPrefix)
 
 	if err != nil {
-		fmt.Errorf("%v", err)
+		_ = fmt.Errorf("%v", err)
 		os.Exit(2)
 	}
 }

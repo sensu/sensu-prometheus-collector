@@ -59,17 +59,21 @@ Help:
 
 ```
 $ sensu-prometheus-collector -h
-Usage of ./sensu-prometheus-collector:
+Usage of sensu-prometheus-collector:
+  -exporter-password string
+    	Prometheus exporter basic auth password
   -exporter-url string
-        Prometheus exporter URL to pull metrics from.
+    	Prometheus exporter URL to pull metrics from.
+  -exporter-user string
+    	Prometheus exporter basic auth user
   -metric-prefix string
-        Metric name prefix, only supported by line protocol output formats.
+    	Metric name prefix, only supported by line protocol output formats.
   -output-format string
-        The check output format to use for metrics {influx|graphite|json}. (default "influx")
+    	The check output format to use for metrics {influx|graphite|json}. (default "influx")
   -prom-query string
-        Prometheus API query string. (default "up")
+    	Prometheus API query string. (default "up")
   -prom-url string
-        Prometheus API URL. (default "http://localhost:9090")
+    	Prometheus API URL. (default "http://localhost:9090")
 ```
 
 Application instrumentation:
@@ -82,11 +86,13 @@ go_memstats_mspan_sys_bytes value=32768 1506991233
 ```
 
 ```
-$ sensu-prometheus-collector -exporter-url http://localhost:8080/metrics -output-format graphite -metric-prefix foo.bar.
+$ sensu-prometheus-collector -exporter-url http://localhost:8080/metrics -exporter-user admin -exporter-password secretpassword -output-format graphite -metric-prefix foo.bar.
 foo.bar.go_memstats_stack_inuse_bytes 294912 1506991405
 foo.bar.go_memstats_mallocs_total 6375 1506991405
 ...
 ```
+
+Exporter basic auth credentials can also be set via environment vars `EXPORTER_USER` and `EXPORTER_PASSWORD`.
 
 Prometheus query API:
 
