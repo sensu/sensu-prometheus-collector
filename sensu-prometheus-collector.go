@@ -138,8 +138,17 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	return nil, errors.New("unexpected response type")
 }
 
-func QueryExporter(exporterURL string) (model.Vector, error) {
-	expResponse, err := http.Get(exporterURL)
+func QueryExporter(exporterURL, authorization string) (model.Vector, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", exporterURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	if authorization != "" {
+		req.Header.Set("Authorization", authorization)
+	}
+
+	expResponse, err := client.Do(req)
 	defer expResponse.Body.Close()
 
 	if err != nil {
@@ -174,6 +183,7 @@ func QueryExporter(exporterURL string) (model.Vector, error) {
 
 func main() {
 	exporterURL := flag.String("exporter-url", "", "Prometheus exporter URL to pull metrics from.")
+	exporterAuthorizationHeader := flag.String("exporter-authorization", "", "Prometheus exporter Authorization header.")
 	promURL := flag.String("prom-url", "http://localhost:9090", "Prometheus API URL.")
 	queryString := flag.String("prom-query", "up", "Prometheus API query string.")
 	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}.")
@@ -184,7 +194,7 @@ func main() {
 	var err error
 
 	if *exporterURL != "" {
-		samples, err = QueryExporter(*exporterURL)
+		samples, err = QueryExporter(*exporterURL, *exporterAuthorizationHeader)
 	} else {
 		samples, err = QueryPrometheus(*promURL, *queryString)
 	}
