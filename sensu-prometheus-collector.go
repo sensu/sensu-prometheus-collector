@@ -31,9 +31,10 @@ type Metric struct {
 	Value float64
 }
 
-type exporterAuth struct {
+type ExporterAuth struct {
 	User     string `envconfig:"user" default:""`
 	Password string `envconfig:"password" default:""`
+  Header   string `envconfig:"header" default:""`
 }
 
 func CreateJSONMetrics(samples model.Vector) string {
@@ -148,23 +149,32 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	return nil, errors.New("unexpected response type")
 }
 
-func QueryExporter(exporterURL string, auth exporterAuth) (model.Vector, error) {
+func QueryExporter(exporterURL string, auth ExporterAuth) (model.Vector, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", exporterURL, nil)
+  
 	if err != nil {
 		return nil, err
 	}
-
-	req.SetBasicAuth(auth.User, auth.Password)
+  
+  if auth.User != "" && auth.Password != "" {
+    req.SetBasicAuth(auth.User, auth.Password)
+  }
+  
+	if auth.Header != "" {
+		req.Header.Set("Authorization", auth.Header)
+	}
 
 	expResponse, err := client.Do(req)
+	defer expResponse.Body.Close()
+
 	if err != nil {
 		return nil, err
 	}
+
 	if expResponse.StatusCode != http.StatusOK {
 		return nil, errors.New("exporter returned non OK HTTP response status: " + expResponse.Status)
 	}
-	defer expResponse.Body.Close()
 
 	var parser expfmt.TextParser
 
@@ -188,18 +198,28 @@ func QueryExporter(exporterURL string, auth exporterAuth) (model.Vector, error) 
 	return samples, nil
 }
 
-func setExporterAuth(user string, password string) (auth exporterAuth) {
-	envconfig.Process(exporterAuthID, &auth)
-	if user != "" && password != "" {
-		auth = exporterAuth{User: user, Password: password}
-	}
-	return
+func setExporterAuth(user string, password string, header string) (auth ExporterAuth) {
+  var auth ExporterAuth
+  
+	err := envconfig.Process(exporterAuthID, &auth)
+  
+  if user != "" && password != "" {
+    auth.User = user
+    auth.Password = password
+  }
+  
+  if auth.Header != "" {
+    auth.Header = header
+  }
+  
+  return auth
 }
 
 func main() {
 	exporterURL := flag.String("exporter-url", "", "Prometheus exporter URL to pull metrics from.")
-	exporterUser := flag.String("exporter-user", "", "Prometheus exporter basic auth user")
-	exporterPassword := flag.String("exporter-password", "", "Prometheus exporter basic auth password")
+	exporterUser := flag.String("exporter-user", "", "Prometheus exporter basic auth user.")
+	exporterPassword := flag.String("exporter-password", "", "Prometheus exporter basic auth password.")
+	exporterAuthorizationHeader := flag.String("exporter-authorization", "", "Prometheus exporter Authorization header.")
 	promURL := flag.String("prom-url", "http://localhost:9090", "Prometheus API URL.")
 	queryString := flag.String("prom-query", "up", "Prometheus API query string.")
 	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}.")
@@ -210,7 +230,8 @@ func main() {
 	var err error
 
 	if *exporterURL != "" {
-		samples, err = QueryExporter(*exporterURL, setExporterAuth(*exporterUser, *exporterPassword))
+    auth = setExporterAuth(*exporterUser, *exporterPassword, *exporterAuthorizationHeader)
+		samples, err = QueryExporter(*exporterURL, auth)
 	} else {
 		samples, err = QueryPrometheus(*promURL, *queryString)
 	}
