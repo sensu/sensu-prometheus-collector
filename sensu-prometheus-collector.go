@@ -34,7 +34,7 @@ type Metric struct {
 type ExporterAuth struct {
 	User     string `envconfig:"user" default:""`
 	Password string `envconfig:"password" default:""`
-  Header   string `envconfig:"header" default:""`
+	Header   string `envconfig:"header" default:""`
 }
 
 func CreateJSONMetrics(samples model.Vector) string {
@@ -152,15 +152,15 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 func QueryExporter(exporterURL string, auth ExporterAuth) (model.Vector, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", exporterURL, nil)
-  
+
 	if err != nil {
 		return nil, err
 	}
-  
-  if auth.User != "" && auth.Password != "" {
-    req.SetBasicAuth(auth.User, auth.Password)
-  }
-  
+
+	if auth.User != "" && auth.Password != "" {
+		req.SetBasicAuth(auth.User, auth.Password)
+	}
+
 	if auth.Header != "" {
 		req.Header.Set("Authorization", auth.Header)
 	}
@@ -198,21 +198,23 @@ func QueryExporter(exporterURL string, auth ExporterAuth) (model.Vector, error) 
 	return samples, nil
 }
 
-func setExporterAuth(user string, password string, header string) (auth ExporterAuth) {
-  var auth ExporterAuth
-  
+func setExporterAuth(user string, password string, header string) (auth ExporterAuth, error error) {
 	err := envconfig.Process(exporterAuthID, &auth)
-  
-  if user != "" && password != "" {
-    auth.User = user
-    auth.Password = password
-  }
-  
-  if auth.Header != "" {
-    auth.Header = header
-  }
-  
-  return auth
+
+	if err != nil {
+		return auth, err
+	}
+
+	if user != "" && password != "" {
+		auth.User = user
+		auth.Password = password
+	}
+
+	if auth.Header != "" {
+		auth.Header = header
+	}
+
+	return auth, nil
 }
 
 func main() {
@@ -230,7 +232,13 @@ func main() {
 	var err error
 
 	if *exporterURL != "" {
-    auth = setExporterAuth(*exporterUser, *exporterPassword, *exporterAuthorizationHeader)
+		auth, err := setExporterAuth(*exporterUser, *exporterPassword, *exporterAuthorizationHeader)
+
+		if err != nil {
+			_ = fmt.Errorf("%v", err)
+			os.Exit(2)
+		}
+
 		samples, err = QueryExporter(*exporterURL, auth)
 	} else {
 		samples, err = QueryPrometheus(*promURL, *queryString)
