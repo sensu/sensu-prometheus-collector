@@ -59,21 +59,23 @@ Help:
 
 ```
 $ sensu-prometheus-collector -h
-Usage of sensu-prometheus-collector:
+Usage of ./sensu-prometheus-collector:
+  -exporter-authorization string
+        Prometheus exporter Authorization header.
   -exporter-password string
-    	Prometheus exporter basic auth password
+        Prometheus exporter basic auth password.
   -exporter-url string
-    	Prometheus exporter URL to pull metrics from.
+        Prometheus exporter URL to pull metrics from.
   -exporter-user string
-    	Prometheus exporter basic auth user
+        Prometheus exporter basic auth user.
   -metric-prefix string
-    	Metric name prefix, only supported by line protocol output formats.
+        Metric name prefix, only supported by line protocol output formats.
   -output-format string
-    	The check output format to use for metrics {influx|graphite|json}. (default "influx")
+        The check output format to use for metrics {influx|graphite|json}. (default "influx")
   -prom-query string
-    	Prometheus API query string. (default "up")
+        Prometheus API query string. (default "up")
   -prom-url string
-    	Prometheus API URL. (default "http://localhost:9090")
+        Prometheus API URL. (default "http://localhost:9090")
 ```
 
 Application instrumentation:

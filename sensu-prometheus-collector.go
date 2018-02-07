@@ -21,6 +21,12 @@ const (
 	exporterAuthID = "exporter"
 )
 
+type ExporterAuth struct {
+	User     string `envconfig:"user" default:""`
+	Password string `envconfig:"password" default:""`
+	Header   string `envconfig:"header" default:""`
+}
+
 type Tag struct {
 	Name  model.LabelName
 	Value model.LabelValue
@@ -29,12 +35,6 @@ type Tag struct {
 type Metric struct {
 	Tags  []Tag
 	Value float64
-}
-
-type ExporterAuth struct {
-	User     string `envconfig:"user" default:""`
-	Password string `envconfig:"password" default:""`
-	Header   string `envconfig:"header" default:""`
 }
 
 func CreateJSONMetrics(samples model.Vector) string {
@@ -210,7 +210,7 @@ func setExporterAuth(user string, password string, header string) (auth Exporter
 		auth.Password = password
 	}
 
-	if auth.Header != "" {
+	if header != "" {
 		auth.Header = header
 	}
 
