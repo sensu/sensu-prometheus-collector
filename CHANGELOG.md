@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2018-12-10
+### Changed
+- Dropped the extra trailing newline
+
 ## [1.1.0] - 2018-12-10
 ### Changed
 - Validating the number of InfluxDB line segments (" ")
