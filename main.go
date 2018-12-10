@@ -170,11 +170,11 @@ func QueryExporter(exporterURL string, auth ExporterAuth) (model.Vector, error) 
 	}
 
 	expResponse, err := client.Do(req)
-	defer expResponse.Body.Close()
 
 	if err != nil {
 		return nil, err
 	}
+	defer expResponse.Body.Close()
 
 	if expResponse.StatusCode != http.StatusOK {
 		return nil, errors.New("exporter returned non OK HTTP response status: " + expResponse.Status)
@@ -244,13 +244,19 @@ func main() {
 		}
 
 		samples, err = QueryExporter(*exporterURL, auth)
+
+		if err != nil {
+			_ = fmt.Errorf("%v", err)
+			os.Exit(2)
+		}
+
 	} else {
 		samples, err = QueryPrometheus(*promURL, *queryString)
-	}
 
-	if err != nil {
-		_ = fmt.Errorf("%v", err)
-		os.Exit(2)
+		if err != nil {
+			_ = fmt.Errorf("%v", err)
+			os.Exit(2)
+		}
 	}
 
 	err = OutputMetrics(samples, *outputFormat, *metricPrefix)

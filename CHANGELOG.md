@@ -4,6 +4,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2018-12-10
+### Changed
+- Validating the number of InfluxDB line segments (" ")
+- Fixed linter violations
+
+### Added
+- Automated Asset builds with goreleaser and Travis CI
+
 ## [1.0.0] - 2018-02-07
 ### Added
 - Exporter basic authentication support (@zsais)
