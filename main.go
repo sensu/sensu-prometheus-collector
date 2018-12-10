@@ -122,7 +122,7 @@ func OutputMetrics(samples model.Vector, outputFormat string, metricPrefix strin
 		output = CreateJSONMetrics(samples)
 	}
 
-	fmt.Println(output)
+	fmt.Print(output)
 
 	return nil
 }
