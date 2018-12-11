@@ -94,6 +94,8 @@ func CreateInfluxMetrics(samples model.Vector, metricPrefix string) string {
 			}
 		}
 
+		metric = strings.Replace(metric, "\n", "", -1)
+
 		value := strconv.FormatFloat(float64(sample.Value), 'f', -1, 64)
 
 		now := time.Now()
