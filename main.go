@@ -106,7 +106,10 @@ func CreateInfluxMetrics(samples model.Vector, metricPrefix string) string {
 
 		metric += fmt.Sprintf(" value=%s %d\n", value, timestamp)
 
-		metrics += metric
+		segments := strings.Split(metric, " ")
+		if len(segments) == 3 {
+			metrics += metric
+		}
 	}
 
 	return metrics
