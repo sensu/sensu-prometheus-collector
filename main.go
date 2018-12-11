@@ -90,7 +90,10 @@ func CreateInfluxMetrics(samples model.Vector, metricPrefix string) string {
 
 		for name, value := range sample.Metric {
 			if name != "__name__" {
-				metric += fmt.Sprintf(",%s=%s", name, value)
+				tags := fmt.Sprintf(",%s=%s", name, value)
+				if !strings.Contains(tags, "\n") && strings.Count(tags, "=") == 1 {
+					metric += tags
+				}
 			}
 		}
 
@@ -103,10 +106,7 @@ func CreateInfluxMetrics(samples model.Vector, metricPrefix string) string {
 
 		metric += fmt.Sprintf(" value=%s %d\n", value, timestamp)
 
-		segments := strings.Split(metric, " ")
-		if len(segments) == 3 {
-			metrics += metric
-		}
+		metrics += metric
 	}
 
 	return metrics
