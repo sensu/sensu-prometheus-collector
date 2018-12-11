@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.4] - 2018-12-10
+### Changed
+- Added InfluxDB line segment count validation (again)
+
 ## [1.1.3] - 2018-12-10
 ### Changed
 - Validating InfluxDB tags, no newline and only one =
