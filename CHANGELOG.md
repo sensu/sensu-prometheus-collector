@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.5] - 2019-01-18
+### Changed
+- Added Bonsai YAML config file
+
 ## [1.1.4] - 2018-12-10
 ### Changed
 - Added InfluxDB line segment count validation (again)
