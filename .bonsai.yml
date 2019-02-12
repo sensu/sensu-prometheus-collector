@@ -6,53 +6,53 @@ builds:
   asset_filename: "#{repo}_#{version}_linux_amd64.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == linux"
-  -  "entity.system.arch == amd64"
+  -  "entity.system.os == 'linux'"
+  -  "entity.system.arch == 'amd64'"
 
 - platform: "linux"
   arch: "386"
   asset_filename: "#{repo}_#{version}_linux_386.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == linux"
-  -  "entity.system.arch == 386"
+  -  "entity.system.os == 'linux'"
+  -  "entity.system.arch == '386'"
 
 - platform: "linux"
   arch: "arm64"
   asset_filename: "#{repo}_#{version}_linux_arm64.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == linux"
-  -  "entity.system.arch == arm64"
+  -  "entity.system.os == 'linux'"
+  -  "entity.system.arch == 'arm64'"
 
 - platform: "linux"
   arch: "armv7"
   asset_filename: "#{repo}_#{version}_linux_armv7.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == linux"
-  -  "entity.system.arch == armv7"
+  -  "entity.system.os == 'linux'"
+  -  "entity.system.arch == 'armv7'"
 
 - platform: "OSX"
   arch: "amd64"
   asset_filename: "#{repo}_#{version}_darwin_amd64.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == darwin"
-  -  "entity.system.arch == amd64"
+  -  "entity.system.os == 'darwin'"
+  -  "entity.system.arch == 'amd64'"
 
 - platform: "OSX"
   arch: "386"
   asset_filename: "#{repo}_#{version}_darwin_386.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == darwin"
-  -  "entity.system.arch == 386"
+  -  "entity.system.os == 'darwin'"
+  -  "entity.system.arch == '386'"
 
 - platform: "Windows"
   arch: "amd64"
   asset_filename: "#{repo}_#{version}_windows_amd64.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
   filter:
-  -  "entity.system.os == windows"
-  -  "entity.system.arch == amd64"
+  -  "entity.system.os == 'windows'"
+  -  "entity.system.arch == 'amd64'"
