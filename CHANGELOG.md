@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.6] - 2019-05-21
+### Changed
+- Fixed Bonsai Asset YAML filter
+
 ## [1.1.5] - 2019-01-18
 ### Changed
 - Added Bonsai YAML config file
