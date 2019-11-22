@@ -5,7 +5,7 @@
 - [Usage examples](#usage-examples)
 - [Configuration](#configuration)
   - [Sensu Go](#sensu-go)
-    - [Asset manifest](#asset-manifest)
+    - [Asset definition](#asset-definition)
     - [Check definition(s)](#check-definitions)
   - [Sensu Core](#sensu-core)
     - [Check definition](#check-definition)
