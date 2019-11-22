@@ -89,7 +89,7 @@ If you're using an earlier version of sensuctl, you can download the asset defin
 
 #### Sensu Go
 
-##### Asset manifiest
+##### Asset definition
 ```yaml
 ---
 type: Asset
