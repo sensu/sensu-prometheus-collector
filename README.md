@@ -113,7 +113,7 @@ spec:
   - entity.system.arch == 'amd64'
 ```
 
-##### Check manifest
+##### Check definition
 
 ```yaml
 ---
