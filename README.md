@@ -6,7 +6,7 @@
 - [Configuration](#configuration)
   - [Sensu Go](#sensu-go)
     - [Asset manifest](#asset-manifest)
-    - [Check manifest(s)](#check-manifests)
+    - [Check definition(s)](#check-definitions)
   - [Sensu Core](#sensu-core)
     - [Check definition](#check-definition)
     - [Handler definition](#handler-definition)
