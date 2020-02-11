@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.1] - 2020-02-11
+### Changed
+- README updates, using the template from https://github.com/sensu-community/check-plugin-template
+
 ## [1.3.0] - 2020-02-11
 ### Changed
 - Removed OSX i386 from Bonsai builds
