@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -158,8 +160,11 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	return nil, errors.New("unexpected response type")
 }
 
-func QueryExporter(exporterURL string, auth ExporterAuth) (model.Vector, error) {
-	client := &http.Client{}
+func QueryExporter(exporterURL string, auth ExporterAuth, insecureSkipVerify bool) (model.Vector, error) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+	}
+	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("GET", exporterURL, nil)
 
 	if err != nil {
@@ -235,6 +240,7 @@ func main() {
 	queryString := flag.String("prom-query", "up", "Prometheus API query string.")
 	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}.")
 	metricPrefix := flag.String("metric-prefix", "", "Metric name prefix, only supported by line protocol output formats.")
+	insecureSkipVerify := flag.Bool("insecure-skip-verify", false, "Skip TLS peer verification.")
 	flag.Parse()
 
 	var samples model.Vector
@@ -244,14 +250,14 @@ func main() {
 		auth, err := setExporterAuth(*exporterUser, *exporterPassword, *exporterAuthorizationHeader)
 
 		if err != nil {
-			_ = fmt.Errorf("%v", err)
+			log.Fatal(err)
 			os.Exit(2)
 		}
 
-		samples, err = QueryExporter(*exporterURL, auth)
+		samples, err = QueryExporter(*exporterURL, auth, *insecureSkipVerify)
 
 		if err != nil {
-			_ = fmt.Errorf("%v", err)
+			log.Fatal(err)
 			os.Exit(2)
 		}
 
@@ -259,7 +265,7 @@ func main() {
 		samples, err = QueryPrometheus(*promURL, *queryString)
 
 		if err != nil {
-			_ = fmt.Errorf("%v", err)
+			log.Fatal(err)
 			os.Exit(2)
 		}
 	}
@@ -267,7 +273,7 @@ func main() {
 	err = OutputMetrics(samples, *outputFormat, *metricPrefix)
 
 	if err != nil {
-		_ = fmt.Errorf("%v", err)
+		_ = fmt.Errorf("error %v", err)
 		os.Exit(2)
 	}
 }
