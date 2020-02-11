@@ -4,6 +4,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2020-02-10
+### Changed
+- Using go modules
+
+### Added
+- TLS insecure skip verify support, e.g. `-insecure-skip-verify`
+
+### Fixed
+- Fixed error logging/output
+
 ## [1.1.6] - 2019-05-21
 ### Changed
 - Fixed Bonsai Asset YAML filter
