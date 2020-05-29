@@ -69,14 +69,23 @@ func CreateGraphiteMetrics(samples model.Vector, metricPrefix string) string {
 	metrics := ""
 
 	for _, sample := range samples {
-		name := fmt.Sprintf("%s%s", metricPrefix, sample.Metric["__name__"])
+		metric := fmt.Sprintf("%s%s", metricPrefix, sample.Metric["__name__"])
+
+		for name, value := range sample.Metric {
+			if name != "__name__" {
+				tags := fmt.Sprintf(";%s=%s", name, value)
+				if !strings.Contains(tags, "\n") && strings.Count(tags, "=") == 1 {
+					metric += tags
+				}
+			}
+		}
 
 		value := strconv.FormatFloat(float64(sample.Value), 'f', -1, 64)
 
 		now := time.Now()
 		timestamp := now.Unix()
 
-		metric := fmt.Sprintf("%s %s %d\n", name, value, timestamp)
+		metric += fmt.Sprintf(" %s %d\n", value, timestamp)
 
 		metrics += metric
 	}
