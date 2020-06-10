@@ -153,29 +153,21 @@ func OutputMetrics(samples model.Vector, outputFormat string, metricPrefix strin
 }
 
 func skipMetric(metricIgnore string, metricExcept string, name string) bool {
-	var prefixesLen, exceptRulesLen int
-
 	exceptRules := strings.Split(metricExcept, ",")
-	exceptRulesLen += len(exceptRules)
 	for _, prefix := range exceptRules {
-		if strings.HasPrefix(name, prefix) {
-			return false
-		}
-	}
-
-	ignoreRules := strings.Split(metricIgnore, ",")
-	prefixesLen += len(ignoreRules)
-	for _, prefix := range ignoreRules {
-		if strings.HasPrefix(name, prefix) {
+		if prefix != "" && !strings.HasPrefix(name, prefix) {
 			return true
 		}
 	}
 
-	if prefixesLen > 0 {
-		return false
+	ignoreRules := strings.Split(metricIgnore, ",")
+	for _, prefix := range ignoreRules {
+		if prefix != "" && strings.HasPrefix(name, prefix) {
+			return true
+		}
 	}
 
-	return exceptRulesLen > 0
+	return false
 }
 
 func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
