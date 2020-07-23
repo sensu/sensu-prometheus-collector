@@ -26,6 +26,14 @@ builds:
   -  "entity.system.arch == 'arm64'"
 
 - platform: "linux"
+  arch: "armv6"
+  asset_filename: "#{repo}_#{version}_linux_armv6.tar.gz"
+  sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
+  filter:
+  -  "entity.system.os == 'linux'"
+  -  "entity.system.arch == 'armv6'"
+
+- platform: "linux"
   arch: "armv7"
   asset_filename: "#{repo}_#{version}_linux_armv7.tar.gz"
   sha_filename: "#{repo}_#{version}_sha512-checksums.txt"
