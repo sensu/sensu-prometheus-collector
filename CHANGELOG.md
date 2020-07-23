@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.2] - 2020-07-23
+### Changed
+- Updated Bonsai YAML to include the armv6 build release assets
+
 ## [1.3.1] - 2020-02-11
 ### Changed
 - README updates, using the template from https://github.com/sensu-community/check-plugin-template
