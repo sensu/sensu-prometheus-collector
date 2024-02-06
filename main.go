@@ -165,7 +165,7 @@ func QueryExporter(exporterURL string, auth ExporterAuth, insecureSkipVerify boo
 
 	tlsconfig := &tls.Config{}
 
-	if insecureSkipVerify == true {
+	if insecureSkipVerify {
 		tlsconfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
