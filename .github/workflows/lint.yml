@@ -1,22 +1,20 @@
-name: Go Test
+name: Go Lint
 
 on: [push]
 
 jobs:
   test:
-    name: Test
+    name: Lint
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [ubuntu-latest]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Unshallow
-      run: git fetch --prune --unshallow
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version-file: 'go.mod'
-    - name: Test
-      run: go test -v ./...
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3
