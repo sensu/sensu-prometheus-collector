@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -160,9 +161,36 @@ func QueryPrometheus(promURL string, queryString string) (model.Vector, error) {
 	return nil, errors.New("unexpected response type")
 }
 
-func QueryExporter(exporterURL string, auth ExporterAuth, insecureSkipVerify bool) (model.Vector, error) {
+func QueryExporter(exporterURL string, auth ExporterAuth, insecureSkipVerify bool, cert string, key string, cacert string) (model.Vector, error) {
+
+	tlsconfig := &tls.Config{}
+
+	if insecureSkipVerify {
+		tlsconfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	if len(cert) > 0 || len(key) > 0 || len(cacert) > 0 {
+		certpair, err := tls.LoadX509KeyPair(cert, key)
+		if err != nil {
+			fmt.Printf("could not load certificate(%s) or key(%s): %v", cert, key, err)
+			os.Exit(3)
+		}
+
+		cacertfile, err := os.ReadFile(cacert)
+		if err != nil {
+			fmt.Printf("could not load CA(%s): %v", cacert, err)
+			os.Exit(3)
+		}
+		rootca := x509.NewCertPool()
+		rootca.AppendCertsFromPEM(cacertfile)
+		tlsconfig = &tls.Config{
+			Certificates: []tls.Certificate{certpair},
+			RootCAs:      rootca,
+		}
+	}
+
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+		TLSClientConfig: tlsconfig,
 	}
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("GET", exporterURL, nil)
@@ -241,6 +269,9 @@ func main() {
 	outputFormat := flag.String("output-format", "influx", "The check output format to use for metrics {influx|graphite|json}.")
 	metricPrefix := flag.String("metric-prefix", "", "Metric name prefix, only supported by line protocol output formats.")
 	insecureSkipVerify := flag.Bool("insecure-skip-verify", false, "Skip TLS peer verification.")
+	cert := flag.String("cert", "", "Certificate to use for authentication")
+	key := flag.String("key", "", "Key to use for authentication")
+	cacert := flag.String("cacert", "", "CA to use for authentication")
 	flag.Parse()
 
 	var samples model.Vector
@@ -254,7 +285,7 @@ func main() {
 			os.Exit(2)
 		}
 
-		samples, err = QueryExporter(*exporterURL, auth, *insecureSkipVerify)
+		samples, err = QueryExporter(*exporterURL, auth, *insecureSkipVerify, *cert, *key, *cacert)
 
 		if err != nil {
 			log.Fatal(err)
