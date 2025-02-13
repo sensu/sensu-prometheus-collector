@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.3] - 2025-02-13
+### Added
+- Support for darwin/arm64 build
+
 ## [1.3.2] - 2020-07-23
 ### Changed
 - Updated Bonsai YAML to include the armv6 build release assets
